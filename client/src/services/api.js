@@ -2,11 +2,10 @@ import axios from "axios";
 import useAuthStore from "../store/authStore";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL, // Now includes /api
   withCredentials: true,
 });
 
-// Auto-attach token from store to every request
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
@@ -15,7 +14,6 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Auto-refresh token on 401
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -23,10 +21,8 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
-        const { data } = await axios.get(
-          `${import.meta.env.VITE_API_BASE_URL}/auth/refresh`,
-          { withCredentials: true }
-        );
+        // Use 'api' instance here so it correctly calls .../api/auth/refresh
+        const { data } = await api.get('/auth/refresh'); 
         useAuthStore.getState().setToken(data.accessToken);
         original.headers.Authorization = `Bearer ${data.accessToken}`;
         return api(original);
