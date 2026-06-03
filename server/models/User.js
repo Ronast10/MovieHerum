@@ -42,13 +42,27 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    isVerified: {
+  type: Boolean,
+  default: false,
+},
+verificationToken: {
+  type: String,
+  default: "",
+},
+verificationExpires: {
+  type: Date,
+},
   },
   { timestamps: true }
 );
 
 // Hash password before saving
 userSchema.pre("save", async function () {
+  // Only hash if password is being modified AND it's not already hashed
   if (!this.isModified("password")) return;
+  // If it's already a bcrypt hash (starts with $2b$), skip
+  if (this.password.startsWith("$2b$")) return;
   this.password = await bcrypt.hash(this.password, 12);
 });
 

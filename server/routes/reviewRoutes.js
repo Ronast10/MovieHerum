@@ -6,6 +6,7 @@ import {
   updateReview,
   deleteReview,
   toggleLike,
+  getAllReviews,
 } from "../controllers/reviewController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
@@ -17,5 +18,6 @@ router.post("/", protect, createReview);
 router.put("/:id", protect, updateReview);
 router.delete("/:id", protect, deleteReview);
 router.put("/:id/like", protect, toggleLike);
+router.get("/", getAllReviews);
 
 export default router;

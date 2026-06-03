@@ -118,3 +118,15 @@ export const toggleLike = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// @GET /api/reviews
+export const getAllReviews = async (req, res) => {
+  try {
+    const reviews = await Review.find()
+      .populate("userId", "username avatar")
+      .sort({ createdAt: -1 });
+
+    res.json(reviews);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

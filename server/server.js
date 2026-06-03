@@ -7,6 +7,8 @@ import authRoutes from "./routes/authRoutes.js";
 import movieRoutes from "./routes/movieRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import watchlistRoutes from "./routes/watchlistRoutes.js";
+import passport from "./config/passport.js";
+import session from "express-session";
 
 dotenv.config();
 connectDB();
@@ -19,7 +21,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }));
+app.use(passport.initialize());
+app.use(passport.session());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
