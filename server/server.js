@@ -15,15 +15,40 @@ connectDB();
 
 const app = express();
 
+// 1. Define your allowed origins
+const allowedOrigins = [
+  "http://localhost:5173",            // For your local development
+  "https://movie-herum.vercel.app"    // Your production Vercel URL
+];
+
+// 2. Update CORS to check the list
 app.use(cors({
-  origin: process.env.CLIENT_URL,
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(cookieParser());
-app.use(session({ secret: process.env.SESSION_SECRET, resave: false, saveUninitialized: false }));
+app.use(session({ 
+  secret: process.env.SESSION_SECRET, 
+  resave: false, 
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === "production", // Secure only in production
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax" // Required for cross-domain cookies
+  }
+}));
 app.use(passport.initialize());
 app.use(passport.session());
+
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
