@@ -6,6 +6,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import movieRoutes from "./routes/movieRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
+import watchlistRoutes from "./routes/watchlistRoutes.js";
 
 dotenv.config();
 connectDB();
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/watchlist", watchlistRoutes);
 
 // Health check
 app.get("/", (req, res) => res.json({ message: "🎬 MovieHerum API running" }));
