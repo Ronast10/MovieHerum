@@ -11,19 +11,22 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (form.password.length < 6) {
-      toast.error("Password must be at least 6 characters");
-      return;
-    }
-    const result = await register(form.username, form.email, form.password);
-    if (result.success) {
-      toast.success("Check your email to verify your account! 📧");
-      navigate("/login");
-    } else {
-      toast.error(result.message);
-    }
-  };
+  e.preventDefault();
+  if (form.password.length < 6) {
+    toast.error("Password must be at least 6 characters");
+    return;
+  }
+  const result = await register(form.username, form.email, form.password);
+  if (result.success) {
+    toast.success(result.message || "Check your email to verify! 📧", {
+      duration: 5000,
+    });
+    navigate("/login");
+  } else {
+    toast.error(result.message);
+  }
+};
+    
 
   return (
     <div className="min-h-screen flex flex-col">
