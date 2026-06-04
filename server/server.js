@@ -1,35 +1,41 @@
 import express from "express";
-import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-
 import connectDB from "./config/db.js";
+import passport from "./config/passport.js";
 import authRoutes from "./routes/authRoutes.js";
 import movieRoutes from "./routes/movieRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import watchlistRoutes from "./routes/watchlistRoutes.js";
-import passport from "./config/passport.js";
 
-dotenv.config();
 connectDB();
 
 const app = express();
 
 /* =========================
-   CORS CONFIG (FIXED)
+   CORS CONFIG
 ========================= */
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://movie-herum.vercel.app"
+  "https://movie-herum.vercel.app",
+  "https://movie-herum-git-main-ronast-s-projects.vercel.app",
 ];
 
 app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.match(/https:\/\/movie-herum.*\.vercel\.app/)
+    ) {
+      return callback(null, true);
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
 }));
 
-// IMPORTANT: handle preflight requests
 app.options(/.*/, cors());
 
 /* =========================
@@ -43,14 +49,13 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === "production", // true in production (Render)
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax"
-  }
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  },
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
-
 /* =========================
    ROUTES
 ========================= */
