@@ -7,14 +7,15 @@ passport.use(
     {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: `${process.env.RENDER_EXTERNAL_URL}/api/auth/google/callback`,
+      callbackURL: process.env.NODE_ENV === "production"
+        ? "https://movieherum.onrender.com/api/auth/google/callback"
+        : "http://localhost:5000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
         let user = await User.findOne({ email: profile.emails[0].value });
 
         if (user) {
-          // Existing user — mark verified if Google login
           if (!user.isVerified) {
             user.isVerified = true;
             await user.save();
@@ -22,9 +23,10 @@ passport.use(
           return done(null, user);
         }
 
-        // New user via Google
         user = await User.create({
-          username: profile.displayName.replace(/\s+/g, "").toLowerCase() + Math.floor(Math.random() * 999),
+          username:
+            profile.displayName.replace(/\s+/g, "").toLowerCase() +
+            Math.floor(Math.random() * 999),
           email: profile.emails[0].value,
           password: Math.random().toString(36).slice(-12),
           avatar: profile.photos[0]?.value || "",
